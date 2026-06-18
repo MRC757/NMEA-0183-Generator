@@ -6,6 +6,8 @@ UDP endpoints (Perle UDP-to-Serial and network devices).
 
 Distributed as a single portable `.exe` — no Python or dependencies required
 on the target machine.
+<img width="1800" height="1255" alt="NMEA1" src="https://github.com/user-attachments/assets/840132ee-d3ec-47e8-9621-67b20aa8526d" />
+<img width="1804" height="1249" alt="NMEA2" src="https://github.com/user-attachments/assets/962c86d5-3d55-4e4d-a250-bedc502317b9" />
 
 ---
 
