@@ -157,6 +157,7 @@ class MainWindow(QMainWindow):
         self._engine.com_status_changed.connect(self._connections_tab.on_com_status_changed)
         self._engine.udp_status_changed.connect(self._connections_tab.on_udp_status_changed)
         self._sentences_tab.sentences_changed.connect(self._fields_tab.refresh)
+        self._connections_tab.connections_changed.connect(self._sentences_tab._refresh_output_list)
 
     # -----------------------------------------------------------------------
     # Actions

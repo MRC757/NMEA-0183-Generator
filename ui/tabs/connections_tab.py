@@ -9,13 +9,15 @@ from PySide6.QtWidgets import (
     QHeaderView, QLabel, QComboBox, QSpinBox,
     QLineEdit, QCheckBox, QMessageBox
 )
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import Qt, QTimer, Signal
 from PySide6.QtGui import QColor
 
 from config.app_config import AppConfig, ComPortConfig, UdpEndpointConfig
 
 
 class ConnectionsTab(QWidget):
+
+    connections_changed = Signal()  # emitted after Apply Changes restarts the engine
 
     def __init__(self, config: AppConfig, engine, parent=None):
         super().__init__(parent)
@@ -266,6 +268,7 @@ class ConnectionsTab(QWidget):
 
         self._status_label.setText("✓ Applied")
         _schedule_label_clear(self._status_label)
+        self.connections_changed.emit()
 
     # -----------------------------------------------------------------------
     # Engine status slots
