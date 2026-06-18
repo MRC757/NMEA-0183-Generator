@@ -14,6 +14,7 @@ env/
 build/
 dist/
 *.spec
+!nmea_tool.spec
 
 # Config (runtime — not source-controlled)
 nmea_tool_config.json
