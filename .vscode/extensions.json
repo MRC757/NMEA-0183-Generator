@@ -1,0 +1,24 @@
+{
+  "recommendations": [
+    // Python language support
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+
+    // Formatting
+    "ms-python.black-formatter",
+    "ms-python.isort",
+
+    // Testing
+    "ms-python.pytest",
+
+    // Developer productivity
+    "eamodio.gitlens",
+    "usernamehw.errorlens",
+    "streetsidesoftware.code-spell-checker",
+    "njpwerner.autodocstring",
+
+    // UI / general
+    "PKief.material-icon-theme",
+    "oderwat.indent-rainbow"
+  ]
+}

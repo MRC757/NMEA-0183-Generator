@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# PyInstaller
+build/
+dist/
+*.spec
+
+# Config (runtime — not source-controlled)
+nmea_tool_config.json
+
+# Logs
+*.log
+nmea_log*.txt
+
+# IDE
+.vscode/settings.json
+*.code-workspace
+
+# Keep these VS Code files
+!.vscode/launch.json
+!.vscode/tasks.json
+!.vscode/extensions.json
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Claude Code workspace
+.claude/
+
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/

@@ -1,0 +1,105 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "🔧  Install Dependencies",
+      "type": "shell",
+      "command": "pip install -r requirements.txt",
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "focus": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🏗   Create Virtual Environment",
+      "type": "shell",
+      "command": "python -m venv .venv && .venv\\Scripts\\activate && pip install -r requirements.txt",
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "focus": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "▶  Run App",
+      "type": "shell",
+      "command": "python main.py",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "options": {
+        "env": {
+          "PYTHONPATH": "${workspaceFolder}"
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "focus": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🧪  Run Tests",
+      "type": "shell",
+      "command": "python -m pytest tests/ -v --tb=short",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "options": {
+        "env": {
+          "PYTHONPATH": "${workspaceFolder}"
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "📦  Build EXE (PyInstaller)",
+      "type": "shell",
+      "command": "build\\build.bat",
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "focus": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🧹  Clean Build Artifacts",
+      "type": "shell",
+      "command": "if exist dist rmdir /S /Q dist && if exist build rmdir /S /Q build && del /Q *.spec 2>nul & echo Clean done",
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🗑  Clear Config File",
+      "type": "shell",
+      "command": "if exist nmea_tool_config.json del nmea_tool_config.json && echo Config cleared",
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    }
+  ]
+}
