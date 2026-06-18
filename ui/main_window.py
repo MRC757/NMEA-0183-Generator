@@ -87,6 +87,14 @@ class MainWindow(QMainWindow):
 
         # Help menu
         help_menu = menu_bar.addMenu("&Help")
+
+        quick_start_action = QAction("&Quick Start Guide", self)
+        quick_start_action.setShortcut("F1")
+        quick_start_action.triggered.connect(self._show_quick_start)
+        help_menu.addAction(quick_start_action)
+
+        help_menu.addSeparator()
+
         about_action = QAction("&About", self)
         about_action.triggered.connect(self._show_about)
         help_menu.addAction(about_action)
@@ -184,6 +192,11 @@ class MainWindow(QMainWindow):
         from utils.theme import apply_theme
         self._config.theme = "dark" if checked else "light"
         apply_theme(QApplication.instance(), self._config.theme)
+
+    def _show_quick_start(self) -> None:
+        from ui.dialogs.quick_start_dialog import QuickStartDialog
+        dlg = QuickStartDialog(parent=self)
+        dlg.show()
 
     def _show_about(self) -> None:
         QMessageBox.about(

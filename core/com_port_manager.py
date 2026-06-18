@@ -7,7 +7,7 @@ Uses pyserial for Windows COM port access.
 
 import threading
 import time
-from typing import Callable, Dict, Optional
+from typing import Callable, Dict, List, Optional
 from dataclasses import dataclass
 
 try:
@@ -16,6 +16,10 @@ try:
     SERIAL_AVAILABLE = True
 except ImportError:
     SERIAL_AVAILABLE = False
+
+# Baud rates tried in order during auto-detection (most common NMEA rates first)
+DETECT_BAUD_RATES: List[int] = [4800, 9600, 19200, 38400, 57600, 115200]
+DETECT_TIMEOUT_PER_RATE = 1.5   # seconds to listen at each rate
 
 
 @dataclass
@@ -157,6 +161,27 @@ class ComPortManager:
             ser = self._ports.get(port_name)
         return ser is not None and ser.is_open
 
+    def detect_baudrate(
+        self,
+        port_name: str,
+        on_detected: Callable[[str, int], None],
+        on_failed: Callable[[str], None],
+    ) -> None:
+        """
+        Probe DETECT_BAUD_RATES in order and call on_detected(port, baud) with
+        the first rate that yields a sentence with a valid NMEA checksum.
+        Runs on a daemon thread so the UI stays responsive.
+        """
+        if not SERIAL_AVAILABLE:
+            on_failed(port_name)
+            return
+        threading.Thread(
+            target=self._detect_loop,
+            args=(port_name, on_detected, on_failed),
+            daemon=True,
+            name=f"BaudDetect-{port_name}",
+        ).start()
+
     # -----------------------------------------------------------------------
     # Internal
     # -----------------------------------------------------------------------
@@ -188,3 +213,41 @@ class ComPortManager:
                         self._statuses[port_name].error = str(e)
                     break
             time.sleep(0.001)
+
+    def _detect_loop(
+        self,
+        port_name: str,
+        on_detected: Callable[[str, int], None],
+        on_failed: Callable[[str], None],
+    ) -> None:
+        from core.nmea_parser import calculate_checksum
+        for baud in DETECT_BAUD_RATES:
+            try:
+                ser = serial.Serial(port=port_name, baudrate=baud, timeout=0.1)
+                deadline = time.monotonic() + DETECT_TIMEOUT_PER_RATE
+                buf = b""
+                found = False
+                while time.monotonic() < deadline:
+                    chunk = ser.read(256)
+                    if chunk:
+                        buf += chunk
+                        while b"\n" in buf:
+                            line, buf = buf.split(b"\n", 1)
+                            text = line.decode("ascii", errors="ignore").strip()
+                            if (text.startswith("$") or text.startswith("!")) and "*" in text:
+                                try:
+                                    body, cs = text[1:].rsplit("*", 1)
+                                    if calculate_checksum(body) == cs[:2].upper():
+                                        found = True
+                                        break
+                                except Exception:
+                                    pass
+                    if found:
+                        break
+                ser.close()
+                if found:
+                    on_detected(port_name, baud)
+                    return
+            except Exception:
+                continue
+        on_failed(port_name)

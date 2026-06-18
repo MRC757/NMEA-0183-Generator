@@ -91,6 +91,15 @@ class NmeaEngine(QObject):
     def available_com_ports(self) -> List[str]:
         return self._com.available_ports()
 
+    def detect_com_baudrate(
+        self,
+        port_name: str,
+        on_detected,
+        on_failed,
+    ) -> None:
+        """Start async baud-rate detection on port_name."""
+        self._com.detect_baudrate(port_name, on_detected, on_failed)
+
     def send_now(self, sentence_cfg: NmeaSentenceConfig) -> None:
         """Immediately send a sentence once (outside the scheduler)."""
         raw = self._build_raw(sentence_cfg)

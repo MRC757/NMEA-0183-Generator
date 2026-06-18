@@ -50,9 +50,16 @@ class ConnectionsTab(QWidget):
         self._com_remove_btn.clicked.connect(self._remove_com_port)
         self._com_refresh_btn = QPushButton("↻ Refresh Ports")
         self._com_refresh_btn.clicked.connect(self._refresh_com_ports)
+        self._com_detect_btn = QPushButton("🔍 Detect Baud Rate")
+        self._com_detect_btn.setToolTip(
+            "Auto-detect the baud rate of the selected COM port by\n"
+            "listening for valid NMEA sentences at each common rate."
+        )
+        self._com_detect_btn.clicked.connect(self._detect_baud_rate)
         com_btn_row.addWidget(self._com_add_btn)
         com_btn_row.addWidget(self._com_remove_btn)
         com_btn_row.addWidget(self._com_refresh_btn)
+        com_btn_row.addWidget(self._com_detect_btn)
         com_btn_row.addStretch()
         com_layout.addLayout(com_btn_row)
         layout.addWidget(com_group)
@@ -162,6 +169,48 @@ class ConnectionsTab(QWidget):
                 combo.clear()
                 combo.addItems(ports or ["COM1"])
                 combo.setCurrentText(current)
+
+    def _detect_baud_rate(self) -> None:
+        """Auto-detect baud rate for the selected COM row."""
+        rows = sorted(set(i.row() for i in self._com_table.selectedItems()))
+        if not rows:
+            QMessageBox.information(self, "Detect Baud Rate",
+                                    "Select a COM port row first.")
+            return
+        row = rows[0]
+        port_widget = self._com_table.cellWidget(row, 1)
+        if not isinstance(port_widget, QComboBox):
+            return
+        port_name = port_widget.currentText()
+        if not port_name:
+            return
+
+        self._com_detect_btn.setEnabled(False)
+        self._status_label.setText(f"Detecting {port_name}…")
+
+        def on_detected(port: str, baud: int) -> None:
+            QTimer.singleShot(0, lambda: _apply_detected(port, baud))
+
+        def on_failed(port: str) -> None:
+            QTimer.singleShot(0, lambda: _apply_failed(port))
+
+        def _apply_detected(port: str, baud: int) -> None:
+            for r in range(self._com_table.rowCount()):
+                pw = self._com_table.cellWidget(r, 1)
+                if isinstance(pw, QComboBox) and pw.currentText() == port:
+                    bw = self._com_table.cellWidget(r, 2)
+                    if isinstance(bw, QComboBox):
+                        bw.setCurrentText(str(baud))
+            self._com_detect_btn.setEnabled(True)
+            self._status_label.setText(f"✓ {port} detected at {baud} baud")
+            _schedule_label_clear(self._status_label)
+
+        def _apply_failed(port: str) -> None:
+            self._com_detect_btn.setEnabled(True)
+            self._status_label.setText(f"✗ Could not detect baud rate for {port}")
+            _schedule_label_clear(self._status_label)
+
+        self._engine.detect_com_baudrate(port_name, on_detected, on_failed)
 
     # -----------------------------------------------------------------------
     # UDP endpoint table
